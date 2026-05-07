@@ -7,6 +7,11 @@ without the Flask / SocketIO / threading machinery.
 Usage:
     python demo_offline.py --enable_torch_compile --use_taehv
 
+On GB200:
+    Install FA4: https://github.com/Dao-AILab/flash-attention/tree/main/flash_attn/cute#development
+
+    uv pip install omegaconf imageio[ffmpeg] easydict lmdb diffusers
+    uv run python demo_offline.py --enable_torch_compile --use_taehv
 """
 
 import os
@@ -16,7 +21,7 @@ import urllib.request
 import numpy as np
 import torch
 from omegaconf import OmegaConf
-from torchvision.io import write_video
+import imageio.v3 as iio
 
 from pipeline import CausalInferencePipeline
 from demo_utils.constant import ZERO_VAE_CACHE
@@ -372,5 +377,5 @@ if __name__ == '__main__':
     )
 
     os.makedirs(os.path.dirname(args.output) or '.', exist_ok=True)
-    write_video(args.output, video, fps=args.fps)
+    iio.imwrite(args.output, video.numpy(), fps=args.fps, codec="libx264")
     print(f"📼 Video saved to {args.output}")
