@@ -7,9 +7,9 @@ without the Flask / SocketIO / threading machinery.
 Usage:
     python demo_offline.py --enable_torch_compile --use_taehv
 
-On GB200 or A100:
+On GB200 or H100:
     [GB200] Install FA4: https://github.com/Dao-AILab/flash-attention/tree/main/flash_attn/cute#development
-    [A100] Install FA2: https://github.com/mjun0812/flash-attention-prebuild-wheels/releases/download/v0.9.4/flash_attn-2.8.3+cu130torch2.11-cp312-cp312-linux_x86_64.whl
+    [H100] Install FA2: https://github.com/mjun0812/flash-attention-prebuild-wheels/releases/download/v0.9.4/flash_attn-2.8.3+cu130torch2.11-cp312-cp312-linux_x86_64.whl
 
     uv pip install omegaconf imageio[ffmpeg] easydict lmdb diffusers
     uv run python demo_offline.py --enable_torch_compile --use_taehv
