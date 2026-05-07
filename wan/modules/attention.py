@@ -5,7 +5,7 @@ try:
     from flash_attn.cute import flash_attn_func, flash_attn_varlen_func
 
     FLASH_ATTN_4_AVAILABLE = True
-except ModuleNotFoundError:
+except (ModuleNotFoundError, ImportError):
     FLASH_ATTN_4_AVAILABLE = False
 
 try:
