@@ -309,8 +309,6 @@ def generate_video_stream(prompt, seed, enable_torch_compile=False, enable_fp8=F
         pipeline._initialize_kv_cache(batch_size=1, dtype=torch.float16, device=gpu)
         pipeline._initialize_crossattn_cache(batch_size=1, dtype=torch.float16, device=gpu)
 
-        noise = torch.randn([1, 21, 16, 60, 104], device=gpu, dtype=torch.float16, generator=rnd)
-
         # Generation parameters
         num_blocks = 7
         current_start_frame = 0
@@ -346,8 +344,7 @@ def generate_video_stream(prompt, seed, enable_torch_compile=False, enable_fp8=F
 
             block_start_time = time.time()
 
-            noisy_input = noise[:, current_start_frame -
-                                num_input_frames:current_start_frame + current_num_frames - num_input_frames]
+            noisy_input = torch.randn([1, current_num_frames, 16, 60, 104], device=gpu, dtype=torch.float16, generator=rnd)
 
             # Denoising loop
             denoising_start = time.time()
@@ -355,7 +352,7 @@ def generate_video_stream(prompt, seed, enable_torch_compile=False, enable_fp8=F
                 if not generation_active or stop_event.is_set():
                     break
 
-                timestep = torch.ones([1, current_num_frames], device=noise.device,
+                timestep = torch.ones([1, current_num_frames], device=noisy_input.device,
                                       dtype=torch.int64) * current_timestep
 
                 if index < len(pipeline.denoising_step_list) - 1:
@@ -371,7 +368,7 @@ def generate_video_stream(prompt, seed, enable_torch_compile=False, enable_fp8=F
                     noisy_input = pipeline.scheduler.add_noise(
                         denoised_pred.flatten(0, 1),
                         torch.randn_like(denoised_pred.flatten(0, 1)),
-                        next_timestep * torch.ones([1 * current_num_frames], device=noise.device, dtype=torch.long)
+                        next_timestep * torch.ones([1 * current_num_frames], device=noisy_input.device, dtype=torch.long)
                     ).unflatten(0, denoised_pred.shape[:2])
                 else:
                     _, denoised_pred = transformer(
@@ -414,7 +411,6 @@ def generate_video_stream(prompt, seed, enable_torch_compile=False, enable_fp8=F
                     outputs = vae_decoder.forward(denoised_pred[:, i:i + 1, :, :, :].half(), is_first_frame, *vae_cache)
                     # outputs = vae_decoder.forward(denoised_pred.float(), *vae_cache)
                     current_pixels, vae_cache = outputs[0], outputs[1:]
-                    print(current_pixels.max(), current_pixels.min())
                     all_current_pixels.append(current_pixels.clone())
                 pixels = torch.cat(all_current_pixels, dim=1)
                 if idx == 0:
