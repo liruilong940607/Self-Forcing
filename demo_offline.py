@@ -273,7 +273,7 @@ def generate_video(prompt, seed, enable_torch_compile=False, enable_fp8=False, u
                 next_timestep = pipeline.denoising_step_list[index + 1]
                 noisy_input = pipeline.scheduler.add_noise(
                     denoised_pred.flatten(0, 1),
-                    torch.randn_like(denoised_pred.flatten(0, 1)),
+                    torch.randn_like(denoised_pred.flatten(0, 1), generator=rnd),
                     next_timestep * torch.ones([1 * current_num_frames], device=noisy_input.device, dtype=torch.long)
                 ).unflatten(0, denoised_pred.shape[:2])
             else:
